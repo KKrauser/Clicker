@@ -12,9 +12,6 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Resource>
       <None Remove="Resources\synchronize.png" />
-      <Resource Include="Resources\synchronize.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Resource>
     </ItemGroup>
 
     <ItemGroup>
