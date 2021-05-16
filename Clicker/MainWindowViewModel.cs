@@ -64,8 +64,8 @@ namespace Clicker
             _escapeKeyHook.SetHook();
 
             var runner = new Runner(ClicksTotal, Delay, DelayDeviation);
-            Task.Delay(TimeSpan.FromSeconds(StartDelay)).Wait();
-
+            await Task.Delay(TimeSpan.FromSeconds(StartDelay));
+            
             try
             {
                 await runner.RunAsync(_tokenSource.Token, progress);
