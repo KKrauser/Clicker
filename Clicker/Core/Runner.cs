@@ -31,17 +31,38 @@ namespace Clicker.Core
             if (delayMin < 0) delayMin = 0;
             var delayMax = _delay + _delayDeviation + 1;
 
-            for (var i = 0; i < _clicksTotal;)
-            {
-                WindowsNative.GetCursorPos(out var cursorPosition);
-                await Task.Delay(_deviationRandomizer.Next(delayMin, delayMax), token);
-                WindowsNative.mouse_event(MouseLeftDownFlag | MouseLeftUpFlag, (uint) cursorPosition.X,
-                    (uint) cursorPosition.Y, 0, 0);
-                i++;
+            if (_clicksTotal > 0) await LimitedClicksRun(delayMin, delayMax, token, progress);
+            else await EndlessClicksRun(delayMin, delayMax, token, progress);
+        }
 
+        private async Task LimitedClicksRun(int delayMin, int delayMax, CancellationToken token, IProgress<double> progress = null)
+        {
+            for (var i = 1; i <= _clicksTotal; i++)
+            {
+                Click();
                 progress?.Report(i * 100d / _clicksTotal);
-                token.ThrowIfCancellationRequested();
+                var delay = _deviationRandomizer.Next(delayMin, delayMax);
+                await Task.Delay(delay, token);
             }
+        }
+
+        private async Task EndlessClicksRun(int delayMin, int delayMax, CancellationToken token, IProgress<double> progress = null)
+        {
+            progress?.Report(0);
+            
+            while (true)
+            {
+                Click();
+                var delay = _deviationRandomizer.Next(delayMin, delayMax);
+                await Task.Delay(delay, token);
+            }
+        }
+
+        private static void Click()
+        {
+            WindowsNative.GetCursorPos(out var cursorPosition);
+            WindowsNative.mouse_event(MouseLeftDownFlag | MouseLeftUpFlag, (uint) cursorPosition.X,
+                (uint) cursorPosition.Y, 0, 0);
         }
     }
 }

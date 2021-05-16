@@ -14,14 +14,24 @@ namespace Clicker
         public int DelayDeviation { get; set; }
         public int StartDelay { get; set; }
 
-        private double _percentsDone;
-        public double PercentsDone
+        private double _progress;
+
+        public double Progress
         {
-            get => _percentsDone;
-            set => SetProperty(ref _percentsDone, value);
+            get => _progress;
+            set => SetProperty(ref _progress, value);
         }
-        
+
+        private string _progressDescription;
+
+        public string ProgressDescription
+        {
+            get => _progressDescription;
+            set => SetProperty(ref _progressDescription, value);
+        }
+
         private bool _isRunning;
+
         public bool IsRunning
         {
             get => _isRunning;
@@ -29,7 +39,7 @@ namespace Clicker
         }
 
         public DelegateCommand RunCommand { get; set; }
-        
+
         private CancellationTokenSource _tokenSource;
         private readonly GlobalKeyHook _escapeKeyHook;
 
@@ -37,6 +47,7 @@ namespace Clicker
         {
             RunCommand = new DelegateCommand(async () => await RunCommandHandler(), () => !IsRunning);
             _escapeKeyHook = new GlobalKeyHook(0x1B, GlobalEscapeKeyDownHandler);
+            ProgressDescription = $"{Progress:F1}%";
         }
 
         private void GlobalEscapeKeyDownHandler(object sender, EventArgs e)
@@ -48,28 +59,25 @@ namespace Clicker
         {
             IsRunning = true;
 
-            if (ClicksTotal > 0)
+            var progress = new Progress<double>(ProgressHandler);
+            _tokenSource = new CancellationTokenSource();
+            _escapeKeyHook.SetHook();
+
+            var runner = new Runner(ClicksTotal, Delay, DelayDeviation);
+            Task.Delay(TimeSpan.FromSeconds(StartDelay)).Wait();
+
+            try
             {
-                var progress = new Progress<double>(ProgressHandler);
-                _tokenSource = new CancellationTokenSource();
-                _escapeKeyHook.SetHook();
-
-                var runner = new Runner(ClicksTotal, Delay, DelayDeviation);
-                Task.Delay(TimeSpan.FromSeconds(StartDelay)).Wait();
-
-                try
-                {
-                    await runner.RunAsync(_tokenSource.Token, progress);
-                }
-                catch (OperationCanceledException)
-                {
-                    _tokenSource.Dispose();
-                    _tokenSource = null;
-                }
-                finally
-                {
-                    _escapeKeyHook.ReleaseHook();
-                }
+                await runner.RunAsync(_tokenSource.Token, progress);
+            }
+            catch (OperationCanceledException)
+            {
+                _tokenSource.Dispose();
+                _tokenSource = null;
+            }
+            finally
+            {
+                _escapeKeyHook.ReleaseHook();
             }
 
             IsRunning = false;
@@ -77,8 +85,16 @@ namespace Clicker
 
         private void ProgressHandler(double percentsDone)
         {
-            if ((int) (percentsDone * 10) != (int) (PercentsDone * 10))
-                PercentsDone = percentsDone;
+            if (ClicksTotal == 0)
+            {
+                Progress = percentsDone;
+                ProgressDescription = "∞";
+                return;
+            }
+
+            if ((int) (percentsDone * 10) == (int) (Progress * 10)) return;
+            Progress = percentsDone;
+            ProgressDescription = $"{Progress:F1}%";
         }
 
         private void ReleaseUnmanagedResources()

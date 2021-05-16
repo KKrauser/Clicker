@@ -11,8 +11,8 @@
 
     <Window.Resources>
         <converters:IntToStringConverter x:Key="IntToStringConverter" />
-        <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         <Style x:Key="ClickerButton" TargetType="{x:Type Button}">
             <Setter Property="Height" Value="30" />
             <Setter Property="Width" Value="100" />
@@ -61,7 +61,8 @@
                 <TextBlock Text="Clicks count: " VerticalAlignment="Center" />
                 <controls:NumericInput x:Name="Count"
                                        Text="{Binding ClicksTotal, Mode=OneWayToSource, Converter={StaticResource IntToStringConverter}}"
-                                       Height="20" Width="60" Margin="0,0,20,0" />
+                                       Height="20" Width="60" Margin="0,0,20,0"
+                                       ToolTip="Enter number of clicks to make or 0 to click until you manually stop it" />
 
                 <TextBlock Grid.Column="1" Text="Click Delay(ms): " VerticalAlignment="Center" />
                 <controls:NumericInput x:Name="Delay"
@@ -82,12 +83,14 @@
             </StackPanel>
         </GroupBox>
 
-        <ProgressBar Grid.Row="1" x:Name="ClickProgressBar" Value="{Binding PercentsDone}"
+        <ProgressBar Grid.Row="1" Value="{Binding Progress}"
                      Style="{StaticResource ClickerProgress}" Margin="15,15" />
-        <TextBlock Grid.Row="1" Text="{Binding ElementName=ClickProgressBar, Mode=OneWay, Path=Value, StringFormat={}{0:0.0}%}"
-                   HorizontalAlignment="Center" VerticalAlignment="Center" />
-        <Button Grid.Row="2" Style="{StaticResource ClickerButton}" Margin="1,1" Content="Run" IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBoolConverter}}" Command="{Binding RunCommand}" />
-        <Label Grid.Row="2" Content="Press ESC to STOP" Foreground="Red" FontSize="14" FontWeight="Bold" Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center">
+        <TextBlock Grid.Row="1" Text="{Binding ProgressDescription}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Button Grid.Row="2" Style="{StaticResource ClickerButton}" Margin="1,1" Content="Run"
+                IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBoolConverter}}" Command="{Binding RunCommand}" />
+        <Label Grid.Row="2" Content="Press ESC to STOP" Foreground="Red" FontSize="14" FontWeight="Bold"
+               Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left"
+               VerticalAlignment="Center">
             <Label.Style>
                 <Style TargetType="Label">
                     <Style.Triggers>
@@ -95,7 +98,8 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Duration="0:0:0.7" From="1" To="0.2" Storyboard.TargetProperty="Opacity" AutoReverse="True" RepeatBehavior="Forever"/>
+                                        <DoubleAnimation Duration="0:0:0.7" From="1" To="0.2" Storyboard.TargetProperty="Opacity"
+                                                         AutoReverse="True" RepeatBehavior="Forever" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
