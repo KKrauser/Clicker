@@ -60,8 +60,8 @@ namespace Clicker.Core
 
         private static void Click()
         {
-            WindowsNative.GetCursorPos(out var cursorPosition);
-            WindowsNative.mouse_event(MouseLeftDownFlag | MouseLeftUpFlag, (uint) cursorPosition.X,
+            WindowsNative.GetCursorPosition(out var cursorPosition);
+            WindowsNative.MouseEvent(MouseLeftDownFlag | MouseLeftUpFlag, (uint) cursorPosition.X,
                 (uint) cursorPosition.Y, 0, 0);
         }
     }

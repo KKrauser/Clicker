@@ -30,17 +30,17 @@ namespace Clicker.Core
         {
             if (_user32Ptr == IntPtr.Zero)
             {
-                _user32Ptr = WindowsNative.LoadLibrary("user32.dll");
+                _user32Ptr = WindowsNative.LoadNativeLibrary("user32.dll");
                 if (_user32Ptr == IntPtr.Zero) throw new Exception("user32.dll cannot be loaded!");
             }
 
             //Since this is a desktop app - ThreadId is 0
-            _hookPtr = WindowsNative.SetWindowsHookEx(WhKeyboardLl, _hookProcedureHandler, _user32Ptr, 0);
+            _hookPtr = WindowsNative.SetWindowsHook(WhKeyboardLl, _hookProcedureHandler, _user32Ptr, 0);
         }
 
         public void ReleaseHook()
         {
-            WindowsNative.UnhookWindowsHookEx(_hookPtr);
+            WindowsNative.UnhookWindowsHook(_hookPtr);
         }
 
         private IntPtr HookProcedureHandler(int code, IntPtr wParam, IntPtr lParam)
@@ -54,13 +54,13 @@ namespace Clicker.Core
                 }
             }
 
-            return WindowsNative.CallNextHookEx(_hookPtr, code, (int) wParam, lParam);
+            return WindowsNative.CallNextHook(_hookPtr, code, (int) wParam, lParam);
         }
 
         private void ReleaseUnmanagedResources()
         {
             ReleaseHook();
-            WindowsNative.FreeLibrary(_user32Ptr);
+            WindowsNative.FreeNativeLibrary(_user32Ptr);
         }
 
         public void Dispose()
